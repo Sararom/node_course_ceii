@@ -1,0 +1,13 @@
+const express = require("express");
+const router = express.Router();
+
+const PostController = require("../../controllers/api/Post");
+
+router.post("/",PostController.create);
+router.get("/id/:_id",PostController.finOneById);
+router.get("/all",PostController.findAll);
+router.patch("/like", PostController.addLike);
+router.put("/", PostController.updatePost);
+router.delete("/", PostController.deleteOneByID);
+
+module.exports = router;
