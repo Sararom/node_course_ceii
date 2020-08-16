@@ -13,11 +13,11 @@ service.verifyCreateFields = ({
             message:"Post Created Bitch!"
         }
     }
-    if(!title||!user){
+    if(!title){
         serviceResponse={
             success:false,
             content: {
-                error: "Me faltan datos pinche escuincle"
+                error: "Title is required"
             }
         }
         return serviceResponse;
@@ -52,7 +52,26 @@ service.verifyUpdatedFields = ({title,description,image}) => {
     return serviceResponse;
 }
 
-service.create = async ({title,description,image,user}) => {
+service.verifyUserAuthority = (post, user) =>{
+    let serviceResponse = {
+        success:true,
+        content:{
+            message:"User Authority Verified"
+        }
+    }
+
+    if(!post.user._id.equals(user._id)){
+        serviceResponse={
+            success: false,
+            content: {
+                error: "This post does not belong to you"
+            }
+        }
+    }
+    return serviceResponse;
+}
+
+service.create = async ({title,description,image}, userID) => {
     let serviceResponse = {
         success: true,
         content: {
@@ -64,7 +83,7 @@ service.create = async ({title,description,image,user}) => {
             title,
             description,
             image,
-            user
+            user: userID
         });
         const postSaved = await post.save();
 
@@ -91,7 +110,7 @@ service.findOneById = async (_id) =>{
     }
 
     try{
-        const post = await PostModel.findById(_id).exec();
+        const post = await PostModel.findById(_id).populate("user", "username._id").exec();
         if(!post){
             serviceResponse={
                 success: false,
@@ -108,6 +127,21 @@ service.findOneById = async (_id) =>{
     }
 }
 
+service.findAllByUserID = async (userID) => {
+    let serviceResponse={
+        success: true,
+        content:{}
+    }
+
+    try {
+        const posts = await PostModel.find({user: userID}).populate("user", "username._id").exec();
+        serviceResponse.content = posts;
+        return serviceResponse;
+    }catch (e) {
+        throw e
+    }
+}
+
 service.findAll = async (page, limit) => {
         let serviceResponse = {
         success:true,
@@ -121,9 +155,9 @@ service.findAll = async (page, limit) => {
                 skip: page * limit,
                 limit:limit,
                 sort: [{
-                    updatedAt:-1
+                    createdAt:-1
                 }]
-            }).exec();
+            }).populate("user", "username._id").exec();
             serviceResponse.content = {
                 posts,
                 count: posts.length,

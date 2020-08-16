@@ -21,16 +21,10 @@ const UserSchema = new Schema({
         required:true,
     },
     photo: String,
-    posts:{
+    savedPosts:{
         type:[{
             type:mongoose.Schema.Types.ObjectId,
-            rel:"Post"
-        }]
-    },
-    savedPost:{
-        type:[{
-            type:mongoose.Schema.Types.ObjectId,
-            rel:"Post"
+            ref:"Post"
         }]
     },
 },

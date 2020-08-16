@@ -12,9 +12,11 @@ controller.register = async (req,res)=>{
     try {
         const {username,email} = req.body;
         const userExists = await UserService.findOneUsernameEmail(username,email);
-        if(userExists){
+
+        if(userExists===true){
+            debug(userExists)
             return res.status(409).json({
-                error:"User already exists"
+                error:"User already exists",
             })
         }
 
